@@ -1,0 +1,27 @@
+version: "3"
+name: "erisa-paycore-stage"
+services:
+  app:
+    env_file: ".env.stage"
+    image: 'erisa/paycore-stage'
+    build:
+      context: .
+    restart: always
+    networks:
+      traefik_net:
+        aliases:
+          - paycore.stage.erisa
+    environment:
+      - SUCCESS_URL_CREATE=https://dashboard.stage.erisa.space/create/place/success
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.paycore-erisa-stage.entrypoints=https
+      - traefik.http.routers.paycore-erisa-stage.rule=Host(`paycore.stage.erisa.space`)
+      - traefik.http.routers.paycore-erisa-stage.tls=true
+      - traefik.http.routers.paycore-erisa-stage.tls.certresolver=letsEncrypt
+      - traefik.http.services.paycore-erisa-stage.loadbalancer.server.port=4000
+
+
+networks:
+  traefik_net:
+    external: true
