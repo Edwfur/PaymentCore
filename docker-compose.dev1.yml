@@ -11,6 +11,7 @@ services:
       traefik_net:
         aliases:
           - paycore.dev1.erisa
+      mongoCluster:
     environment:
       - SUCCESS_URL_CREATE=https://dashboard.dev1.erisa.space/create/place/success
     labels:
@@ -24,4 +25,6 @@ services:
 
 networks:
   traefik_net:
+    external: true
+  mongoCluster:
     external: true
