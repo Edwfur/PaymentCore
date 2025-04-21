@@ -10,9 +10,9 @@ export class OrderController {
 
 	@Post()
 	@ApiOperation({summary: "Создание заказа"})
-	async createOrder(@Body() body: {placeId: string; tariffId: string}, @Headers("Authorization") auth: string) {
+	async createOrder(@Body() body: {placeId: string; tariffId: string; phone: string}, @Headers("Authorization") auth: string) {
 		if (auth !== process.env.AUTHORIZATION_KEY) throw new ForbiddenException()
-		return this.orderService.createOrder(body.placeId, body.tariffId)
+		return this.orderService.createOrder(body.placeId, body.tariffId, body.phone)
 	}
 
 	@Post("callback")

@@ -3,6 +3,7 @@ import {InjectModel} from "@nestjs/mongoose"
 import axios from "axios"
 import * as dayjs from "dayjs"
 import {Model, Types} from "mongoose"
+import {clearPhone} from "utils/clearPhone"
 import {createToken} from "utils/createToken"
 
 import {Institution} from "../schema/Institution.schema"
@@ -31,7 +32,7 @@ export class OrderService {
 		@InjectModel(Institution.name) private readonly institutionModel: Model<Institution>
 	) {}
 
-	async createOrder(placeId: string, tariffId: string): Promise<{orderId: string; paymentUrl: string}> {
+	async createOrder(placeId: string, tariffId: string, phone: string): Promise<{orderId: string; paymentUrl: string}> {
 		const tariff = await this.tariffModel.findOne({_id: new Types.ObjectId(tariffId)}).lean()
 
 		if (!tariff) throw new BadRequestException("Tariff not found")
@@ -41,6 +42,7 @@ export class OrderService {
 			place: new Types.ObjectId(placeId),
 			price: tariff.price,
 			tariff: new Types.ObjectId(tariffId),
+			phone: `+${clearPhone(phone)}`,
 		})
 
 		order.save()
@@ -53,7 +55,26 @@ export class OrderService {
 			SuccessURL: process.env.SUCCESS_URL_CREATE,
 		}
 
-		const result = await axios.post(`${process.env.TBANK_API}/v2/Init`, {...data, Token: createToken(data)}).then((res) => res.data)
+		const result = await axios
+			.post(`${process.env.TBANK_API}/v2/Init`, {
+				...data,
+				Receipt: {
+					Phone: order.phone,
+					Taxation: "usn_income",
+					Items: [
+						{
+							Name: order.name,
+							Price: order.price,
+							Quantity: 1,
+							Amount: order.price,
+							PaymentObject: "service",
+							Tax: "none",
+						},
+					],
+				},
+				Token: createToken(data),
+			})
+			.then((res) => res.data)
 
 		order.paymentId = result.PaymentId
 		order.paymentUrl = result.PaymentURL

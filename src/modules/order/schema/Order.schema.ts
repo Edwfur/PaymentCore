@@ -29,6 +29,10 @@ export class OrderErisa {
 	@Prop({default: "NEW"})
 	status: string
 
+	@ApiProperty({description: "Номер телефона"})
+	@Prop()
+	phone: number
+
 	@ApiProperty({description: "Номер оплаты"})
 	@Prop()
 	paymentId?: number
