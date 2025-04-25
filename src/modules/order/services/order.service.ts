@@ -76,6 +76,8 @@ export class OrderService {
 			})
 			.then((res) => res.data)
 
+		console.log("result", result)
+
 		order.paymentId = result.PaymentId
 		order.paymentUrl = result.PaymentURL
 
